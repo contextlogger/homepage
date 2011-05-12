@@ -29,6 +29,18 @@ html :
 
 web : concepts upload-php html
 
+HTDOCS := ../contextlogger.github.com
+PAGEPATH := contextlogger2
+PAGEHOME := $(HTDOCS)/$(PAGEPATH)
+
+release :
+	-mkdir -p $(PAGEHOME)
+	cp -a index.html $(HTDOCS)/
+	rsync -av --delete contextlogger2/ $(PAGEHOME)/
+
+upload :
+	cd $(HTDOCS) && git add index.html $(PAGEPATH) && git commit -a -m updates && git push
+
 binaries :
 	cd ../launcher && make release
 	cd ../watchdog && make release
