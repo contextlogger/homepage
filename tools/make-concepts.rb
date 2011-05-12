@@ -85,7 +85,7 @@ end
 
 #pp $concept_map
 
-$api_root = 'daemon/private-cxx-api/html'
+$api_root = 'api'
 
 $rel_api_root = Pathname.new(File.expand_path($api_root)).relative_path_from(Pathname.new($docroot))
 
@@ -122,8 +122,6 @@ end
 puts %q{ContextLogger2 Source Code Bits of Interest
 
 %%mtime(%c)
-
-%!includeconf: config.t2t
 
 Below is a list of pointers to some of the more interesting bits of
 code in the ContextLogger2 codebase, in the authors' opinion.

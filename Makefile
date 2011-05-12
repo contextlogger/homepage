@@ -1,41 +1,38 @@
 SAKE := ../tools/bin/sake
 
-default : html
+default : web
 
 -include local/custom.mk
 
-binaries :
-	cd ../launcher && make release
-	cd ../watchdog && make release
-	cd ../megasis && make release
-
-.PHONY : web copying concepts
-
-copying :
-	cp ../watchdog/graph/states.png web/
+.PHONY : web concepts binaries
 
 concepts :
-	ruby tools/make-concepts.rb > web/concepts.txt2tags.txt
+	mkdir -p web
+	ruby tools/make-concepts.rb > /tmp/concepts.txt2tags.txt
+	../tools/bin/txt2tags --target xhtml --infile /tmp/concepts.txt2tags.txt --outfile web/concepts.html --encoding utf-8 --verbose -C homepage/config.t2t
 
 upload-php :
+	mkdir -p web
 	cp -a ../upload-php/upload.php /tmp/
 	-rm /tmp/upload.php.html
 	cd /tmp && coderay -php -page < upload.php > upload.php.html
 	cp -a /tmp/upload.php.html web/
 
-coderay-install :
-	gem install coderay
-
-gem-fix :
-	gem sources -a http://production.s3.rubygems.org/
-	gem sources -r http://gems.rubyforge.org/
-
 html :
+	mkdir -p web
 	$(SAKE) web
-	tools/txt2tags --target xhtml --infile ../CONTENTS.txt --outfile web/contents.html --encoding utf-8 --verbose --toc -C web/config.t2t
+	cp -a ../tools/web/hiit.css web/
+	cp -a ../watchdog/graph/states.png web/
+	cp -a homepage/*.cpp homepage/*.hpp homepage/*.png homepage/*.jpg homepage/*.diff homepage/index.html web/
+	../tools/bin/txt2tags --target xhtml --infile ../CONTENTS.txt --outfile web/contents.html --encoding utf-8 --verbose --toc -C homepage/config.t2t
 	tidy -utf8 -eq web/index.html
 
-web : copying concepts upload-php html
+web : concepts upload-php html
+
+binaries :
+	cd ../launcher && make release
+	cd ../watchdog && make release
+	cd ../megasis && make release
 
 full : web binaries
 
@@ -46,3 +43,10 @@ rm-apidoc :
 	cd ../daemon && make rm-apidoc
 
 all-api : apidoc concepts upload-api rm-apidoc
+
+coderay-install :
+	gem install coderay
+
+gem-fix :
+	gem sources -a http://production.s3.rubygems.org/
+	gem sources -r http://gems.rubyforge.org/

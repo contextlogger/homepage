@@ -13,10 +13,10 @@ try_load('local/releasing.rb')
 
 desc "Prepares web pages."
 task :web do
-  srcfiles = Dir['web/*.txt2tags.txt']
+  srcfiles = Dir['homepage/*.txt2tags.txt']
   for srcfile in srcfiles
-    htmlfile = srcfile.sub(/\.txt2tags\.txt$/, ".html")
-    sh("tools/txt2tags --target xhtml --infile %s --outfile %s --encoding utf-8" % [srcfile, htmlfile])
+    htmlfile = File.join("web", File.basename(srcfile.sub(/\.txt2tags\.txt$/, ".html")))
+    sh("../tools/bin/txt2tags --target xhtml --infile %s --outfile %s --encoding utf-8 -C homepage/config.t2t" % [srcfile, htmlfile])
   end
 end
 
