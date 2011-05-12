@@ -1,0 +1,31 @@
+ContextLogger2 Implementation Status
+
+%%mtime(%c)
+
+%!includeconf: config.t2t
+
+h1. Status Overview
+
+Under development.
+
+Has most of the planned features, but could use a friendlier GUI application, and further improvements to securing the logfiles.
+
+h1. Following Development Progress
+
+To keep updated about progress, you can look at:
+
+- updates to the list of [known defects known_bugs.html]
+
+- updates to the planned [project roadmap roadmap.html]
+
+- commits to the [source code source.html] repository
+
+- [tweets http://twitter.com/contextlogger] by the developers
+
+
+------------------------------------------------
+_signature_
+
+% Local Variables:
+% mode: longlines
+% End:

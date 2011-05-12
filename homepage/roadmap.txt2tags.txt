@@ -1,0 +1,56 @@
+ContextLogger2 Roadmap
+
+%%mtime(%c)
+
+%!includeconf: config.t2t
+
+- It would be good to have a **descriptive error dialog** should there be an error parsing/evaluating the contents of any **configuration file**.
+
+- Create/find Lua bindings for sqlite3 database access. Adapt for log database (LogDb) access; this will allow for **database queries via the Symbian client/server interface**, and later remotely. See ``libluasqlite3.c`` in the codebase. We can remove database opening/closing functions, and just export a handle to the one database that we do have.
+
+- An end-user **logger control panel** application. Something simple and pretty, just for starting and stopping logger and watchdog. Based on Qt, probably.
+
+- **WLAN scanning** would be a useful addition for collecting location data. Look at the wlantools Python extension, or at [WLANMgmt https://www.iyouit.eu/portal/Software.aspx]. Alternatively: it seems that Symbian^3 devices support 'Wi-Fi/Network' positioning, and we might be able to just use an ``RPositioner`` to get position information based on WLAN information, say in the ``cellpos`` sensor, after cell ID changes.
+
+- Implement a cross-platform sensor based on each of the following [Qt Mobility Sensors API http://doc.qt.nokia.com/qtmobility-1.1.0/sensors-api.html] sensors: QAccelerometerSensor, QCompassSensor, QOrientationSensor, and QRotationSensor. See also Symbian [Sensor Channel API http://library.forum.nokia.com/topic/S60_5th_Edition_Cpp_Developers_Library/GUID-759FBC7F-5384-4487-8457-A8D4B76F6AA6/html/Sensor_Channel_APIIndexPage.html] for info on the underlying sensor interface. Note that the polling Qt-based sensors are IPC heavy as revealed by ``sensorbackendsym.cpp``, which requests readings without any buffering. Specifying a ``dataRate`` may be important.
+
+- Grab an SMS sending function (some new Nokia libs out there make this really easy). Create a Lua binding. Also define an sqlite function for evaling a Lua expression. This makes it possible to remotely set up **database triggers that send notifications via SMS**. May want to restrict numbers for security, no premium numbers please; specify a number validator in Ragel.
+
+- A **status indicator** that shows whether the logger is running, on the standby screen. ContextPhone has this, and we can perhaps use the same code; see ``ContextNotify`` (server drawing on top of Phone screen) and ``ContextNotifyClient`` (driving the thing); this solution is a klugde, though, but the only thing that one can do pre-N97 without being a manufacturer.
+
+- A proper **status indicator** for devices with N97 style standby screen. On the N97 (only) there is the [Home Screen Publishing API http://library.forum.nokia.com/topic/S60_5th_Edition_Cpp_Developers_Library/GUID-759FBC7F-5384-4487-8457-A8D4B76F6AA6/html/Home_Screen_Publishing_APIIndexPage.html] that we can use instead of more kludgey solutions.
+
+- Could use some **Lua bindings for Remokon** access. Start, stop, is running, is connected, is enabled, send given message to given JID, etc. Add Remokon submenu to Launcher.
+
+- Could use a command for **resetting Lua state** in remote control sessions, to prevent running out of memory in cases where say a lot of variables are assigned to in the "REPL". This may be the one thing that perhaps should not be done in Lua itself, as it might be hard to do it safely.
+
+- **Authenticate uploaders**. Presently, there is server authentication and confidentiality for uploads, but no client authentication. Hence unauthorized parties may do uploads, and impersonation is possible, and this should be addressed by utilizing a shared secret, most likely. HTTP may have its own authentication methods. TLS is supposed to allow for authentication of both endpoints. The SASL protocol may be an option for implementing challenge/response authentication in a standard way, if suitable implementations are available. Use of authorization certificates (rather than authenticating) is also an option. See the [Forum Nokia document http://sw.nokia.com/id/a60ed5ab-c2fc-486c-89d0-2695b67ffec4/Installing_Certificates_to_S60_3rd_Edition_Devices_v1_1_en.pdf] which discusses installing client authentication cert installation.
+
+- **More expressive time specifications.** Implement/find Unix time processing functions for Lua. (The "os" module has some, but they may not be sufficient.) These will allow Uploader time expressions to be given in Lua rather than the less expressive language we currently use, and this will actually reduce the size of the binary. Modify Uploader accordingly.
+
+- **Call recording** would be nice. ContextPhone has this.
+
+- Timed or event-triggered **microphone** audio sampling would not hurt either. [Mobile STK http://sourceforge.net/projects/mobilestk/] has example code for doing audio recording on Symbian. The [Media Recorder API http://wiki.forum.nokia.com/index.php/Media_Recorder_API] sounds related.
+[MMFDevSound API http://wiki.forum.nokia.com/index.php/MMFDevSound_API] might also be. Using Qt might also be an option, see ``QAudioCaptureSource`` and ``QMediaRecorder`` in the Multimedia API of [Qt Mobility http://qt.nokia.com/products/qt-addons/mobility/], and http://qt.gitorious.org/qt-mobility/serviceframework/trees/master/examples/audiorecorder for an example application.
+
+- **More sensors**: lock status, visible WLAN nodes, light status, [new email status http://wiki.forum.nokia.com/index.php/KCoreAppUIsNewEmailStatus_API], [accessory mode change http://wiki.forum.nokia.com/index.php/KAccessoryModeChanged_API], ...
+
+- As an optimization, the Symbian **local server interface** should be updated to create only a **single Lua state instance per session**, rather than one per command. This also increases code duplication as it then becomes possible to give some Lua definitions only once per session. The Launcher might be modified to take advantage of this, to create a session only once per command sequence.
+
+- The **N97** supports a new [OOM Monitor Client API http://library.forum.nokia.com/topic/S60_5th_Edition_Cpp_Developers_Library/GUID-759FBC7F-5384-4487-8457-A8D4B76F6AA6/html/OOM_Monitor_APIIndexPage.html]. We might want to be using this for better **system-wide low-memory condition handling**.
+
+- **Sandbox mobile code.** Add privilege support to Lua VM. Flag to VM and checks to dangerous bindings. Mobile code may not execute privileged functions. Or it may be enough to simply choose carefully what libraries to make available to a given Lua instance. But any of this will not be useful until significant functionality is implemented internally for Lua, and said functionality requires dangerous operations.
+
+- After-checkout **source tree preparation**. Building the logger, freshly checked out with Git, is not straightforward when relying on standard tools such as ABLD and Carbide. Have a single platform-agnostic script at the root of the repo that produces the generated source files for all components, and also creates standard ``group`` directories with project files for some sensible default configuration. This should make it easier to get started. For added convenience, might even generate Carbide projects files if there is a tool that supports their creation.
+
+- A **MeeGo**, **iPhone** (jailbroken), **Android**, or **Bada** port would be of interest.
+
+- Ovi **Notifications API** based transport option for remote control. Presumably costs hardly anything if there is any other application also using the API. See the [announcement http://blogs.forum.nokia.com/blog/long-live-your-mobile-battery/2010/09/29/ovi-notifications-api-intelligent-way-to-stay-connected-to-the-network]. There is also a [white paper http://www.forum.nokia.com/info/sw.nokia.com/id/04ccf534-f03d-404b-9fd6-debc186dc05d/Notifications_API_WP_Dec.pdf.html] and a [project page https://projects.forum.nokia.com/notificationsapi]. Still in beta.
+
+
+------------------------------------------------
+_signature_
+
+% Local Variables:
+% mode: longlines
+% End:

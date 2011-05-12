@@ -1,0 +1,39 @@
+ContextLogger2
+
+%%mtime(%c)
+
+%!includeconf: config.t2t
+%! Options : --toc --enum-title
+
+h1. Source Code
+
+- ContextLogger2 source code is retrievable with [Git http://git-scm.com/]: 
+
+```
+git clone git://github.com/contextlogger/contextlogger2.git
+```
+
+- [content description contents.html]
+
+- [API documentation http://contextlogger.github.com/api/]
+
+- [source code reading recommendations concepts.html]
+
+
+h2. Watchdog
+
+Given that the watchdog program could be useful for launching other programs as well (with minor modifications), we provide its full source code as a separately packaged download.
+
+- [watchdog source tarballs http://korpi.hiit.fi/contextlogger2/watchdog/dist/]
+
+
+h1. Contributing
+
+Code contributions are welcome. Bugfixes and support for additional "sensors" (e.g., the accelerometer) would be of particular interest. Send patches to _CommitEmailAddress_, or make a GitHub pull request.
+
+------------------------------------------------
+_signature_
+
+% Local Variables:
+% mode: longlines
+% End:

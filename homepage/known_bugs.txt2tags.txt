@@ -1,0 +1,45 @@
+ContextLogger2 Known Defects
+
+%%mtime(%c)
+
+%!includeconf: config.t2t
+
+- **Proximity** sensor may produce events too frequently for the current write-to-file-immediately logging to be sensible. Should optimize.
+
+- Support for **system backups** of the CL2 libraries has not been fully implemented/tested. See recent PyS60 releases for more on this, or http://wiki.forum.nokia.com/index.php/TSS001073_-_Backup_of_add-on_DLLs. We should add support for url plugin, epocxplat lib, cxx lib, py lib, and miso lib.
+
+- QXmpp sessions sometimes fail on Symbian^3 for some reason, and result in repeated socket errors, indefinitely, seemingly without being able to ever recreate the session. The socket error being repeated is ``QAbstractSocket::HostNotFoundError`` (2). The retry frequency does not decrease as it should, suggesting that the failure counter is not being incremented. There is a possibly related [Qt bug report http://bugreports.qt.nokia.com/browse/QTBUG-8687].
+
+- Some our Qt code may leak resources if an exception occurs in a class constructor.
+
+- The **Qt-based** uploader does not have **IAP selection** code for Symbian, which it really should have to honor roaming settings etc. Although things work quite well without on Symbian^3, which tends to be more automatic when it comes to creating connections. ``QNetworkConfigurationManager`` does not appear to currently list any configurations on Symbian^3, which may be a bug in Qt. (It does list something on S60 v5.0.)
+
+- There is flight mode observing in the call status sensor. To avoid duplication of logic, should get this information via the blackboard. (More maintainable, and likely more efficient as well.)
+
+- The **remote REPL** could be nicer; it presently does not deal with multiple return values, nor does it turn non-string-coercable values into something printable. Another problem is that the ``print`` function prints to the console, which may not make sense on a phone, or it may be intrusive if there is a pop-up. These two issues could perhaps be addressed together by modifying the ``print`` function to print into a buffer, and then sending that buffer back as the reply if there is no return value from the Lua expression. Printing does coerce all values into strings.
+
+- Check if data connections or BT scans **interfere with phone calls**; if so, should perhaps stop interfering scanners for the duration of any phone call.
+
+- Check if phone calls interfere with remokon connections, and deal with it somehow. Certainly it would seem that a phone call can end the remokon connection (it does not always), but this does not necessarily even get noticed, unless there are write attempts.
+
+- Lua **error reporting** does not work correctly when the logger is built for Symbian with GCCE v3, as we do. This is due to a compiler bug, for which we have implemented a workaround such that the error messages look strange and incomplete. We should try building with GCCE v4, and adjust the SDK(s) so that the tools and headers are compatible with both GCCE v3 and v4 rather than just v3.
+
+- The **Symbian client/server** interface is not fully implemented, making it presently impossible to receive the result when evaluating a Lua expression that produces a long (textual) result. This is not difficult to implement, but as of yet we have not had the need to implement the full interface.
+
+- If daemon exits in the middle of database schema creation, and this will cause a fatal error upon SQL prepared statement generation next time around. And the next. And the next.
+
+- The **Qxmpp** library does not use ``q_check_ptr`` to check for ``new`` success, which should really be done to support Symbian default behavior.
+
+- Upon a sudden ``ExitApplication`` we are getting "Lbs Client Fault" 16 initiated on us by the positioning server ("if the outstanding notification requests are not cancelled before calling RPositionServer::Close"). It is a bit strange that we would not be allowed to ``Exit`` before doing some cleanup to avoid making some service unhappy. (Given the design of the client-server framework, designed to support resource cleanup in such situations.) It may not make sense to try to fix this, as really it is the positioning server in the wrong here.
+
+- The Symbian-based uploader consistently crashes after each upload on Symbian^3, which may be a bug the Symbian^3 implementation of ``RHTTPSession`` and co. Until this issue has been resolved, the Qt-based uploader may be used instead on Symbian^3.
+
+- Symbian builds do not support nested C++ exceptions. This affects Qt, and may hence also affect CL2 when Qt is being used. [Qt bug report http://bugreports.qt.nokia.com/browse/QTBUG-4852].
+
+
+------------------------------------------------
+_signature_
+
+% Local Variables:
+% mode: longlines
+% End:

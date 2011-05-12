@@ -1,0 +1,401 @@
+diff --git a/daemon/src/epoc-weburl.cpp b/daemon/src/epoc-weburl.cpp
+new file mode 100644
+index 0000000..265d79b
+--- /dev/null
++++ b/daemon/src/epoc-weburl.cpp
+@@ -0,0 +1,131 @@
++#include "epoc-weburl.hpp"
++
++#if __WEBURL_ENABLED__
++
++#include "er_errors.h"
++#include "log-db-logging.h"
++#include "sa_sensor_list_log_db.h"
++#include "utils_cl2.h"
++
++#include "common/utilities.h"
++
++// -------------------------------------------------------------------
++// the sensor object implementation...
++
++CTOR_IMPL_CSensor_weburl;
++
++void CSensor_weburl::ConstructL()
++{
++  iAhle = CAHLE::NewL();
++  iAhle->SetObserverL(this);
++}
++
++CSensor_weburl::~CSensor_weburl()
++{
++  delete iAhle;
++  delete iOldUrlArray;
++}
++
++void CSensor_weburl::AdaptiveListChanged(TInt errCode)
++{
++  //logf("AdaptiveListChanged(%d)", errCode);
++  if (errCode) {
++    er_log_symbian(0, errCode,
++		   "URL change notification failure in weburl sensor");
++  } else {
++    TRAP(errCode, LogDataL());
++    if (errCode) {
++      er_log_symbian(0, errCode,
++		     "URL data logging in weburl sensor");
++    }
++  }
++}
++
++#define MAX_URLS 100
++
++void CSensor_weburl::LogDataL()
++{
++  CDesCArray* urlArray = new (ELeave) CDesCArrayFlat(MAX_URLS);
++  CleanupStack::PushL(urlArray);
++
++  CDesCArray* nameArray = new (ELeave) CDesCArrayFlat(MAX_URLS);
++  CleanupStack::PushL(nameArray);
++
++  // This just appears to give us the first items in the adaptive
++  // list. There does not seem to be a way to request the latest
++  // addition to the list. We may have to keep any previous copy of
++  // urlArray, and log the new ones only. Difficult to analyze, but
++  // better than nothing, I guess.
++  iAhle->AdaptiveListL(*urlArray, *nameArray, MAX_URLS, 
++		       KNullDesC, 
++		       //EAHLEAdaptiveSiteList // (short url, short url) 
++		       EAHLEAdaptiveSiteDetails // (caption, long url)
++		       //EAHLEAdaptiveAutoComplete // (caption, long url)
++		       );
++
++  TInt numItems = urlArray->Count();
++  logf("read total of %d adaptive history items", numItems);
++
++  for (TInt i = 0; i < numItems; i++) {
++    TPtrC url16(urlArray->MdcaPoint(i));
++    TInt dummyPos;
++    if ((!iOldUrlArray) ||
++	// This returns zero if a match is found.
++	// iOldUrlArray must be sorted for this to work.
++	iOldUrlArray->FindIsq(url16, dummyPos, ECmpNormal)) {
++
++      HBufC8* name8 = ConvToUtf8ZL(nameArray->MdcaPoint(i));
++      CleanupStack::PushL(name8);
++      
++      HBufC8* url8 = ConvToUtf8ZL(url16);
++
++      const char* name = (const char*)(name8->Ptr());
++      const char* url = (const char*)(url8->Ptr());
++      //logf("name is '%s', URL is '%s'", name, url);
++      log_db_log_weburl(GetLogDb(), name, url, NULL);
++
++      delete url8;
++      CleanupStack::PopAndDestroy(name8);
++    }
++  }
++
++  CleanupStack::PopAndDestroy(nameArray);
++  CleanupStack::Pop(urlArray);
++
++  urlArray->Sort(ECmpNormal);
++  delete iOldUrlArray;
++  iOldUrlArray = urlArray;
++}
++
++#endif // __WEBURL_ENABLED__
++
++/**
++
++epoc-weburl.cpp
++
++Copyright 2009-2010 Helsinki Institute for Information Technology
++(HIIT) and the authors. All rights reserved.
++
++Authors: Tero Hasu <tero.hasu@hut.fi>
++
++Permission is hereby granted, free of charge, to any person
++obtaining a copy of this software and associated documentation files
++(the "Software"), to deal in the Software without restriction,
++including without limitation the rights to use, copy, modify, merge,
++publish, distribute, sublicense, and/or sell copies of the Software,
++and to permit persons to whom the Software is furnished to do so,
++subject to the following conditions:
++
++The above copyright notice and this permission notice shall be
++included in all copies or substantial portions of the Software.
++
++THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
++EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
++MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
++NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
++BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
++ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
++CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
++SOFTWARE.
++
++ **/
+diff --git a/daemon/src/epoc-weburl.hpp b/daemon/src/epoc-weburl.hpp
+new file mode 100644
+index 0000000..efd4b31
+--- /dev/null
++++ b/daemon/src/epoc-weburl.hpp
+@@ -0,0 +1,130 @@
++#ifndef __epoc_weburl_hpp__
++#define __epoc_weburl_hpp__
++
++#include "application_config.h"
++
++#if __WEBURL_ENABLED__
++
++#include "ac_app_context.h"
++#include "log-db.h"
++#include "utils_cl2.h"
++
++// Note that this sensor relies on a DLL that is not available on 5th
++// edition devices. Hence dynamic linking fails, and the logger will
++// not even start.
++#include <ahleclientobserver.h> 
++#include <ahle.h>
++
++/***koog 
++(require codegen/symbian-cxx)
++(ctor-defines/spec
++ "CSensor_weburl" ;; name
++ "ac_AppContext* aAppContext" ;; args
++ "iAppContext(aAppContext)" ;; inits
++ "" ;; ctor
++ #t ;; ConstructL
++)
++ ***/
++#define CTOR_DECL_CSensor_weburl  \
++public: static CSensor_weburl* NewLC(ac_AppContext* aAppContext); \
++public: static CSensor_weburl* NewL(ac_AppContext* aAppContext); \
++private: CSensor_weburl(ac_AppContext* aAppContext); \
++private: void ConstructL();
++
++#define CTOR_IMPL_CSensor_weburl  \
++CSensor_weburl* CSensor_weburl::NewLC(ac_AppContext* aAppContext) \
++{ \
++  CSensor_weburl* obj = new (ELeave) CSensor_weburl(aAppContext); \
++  CleanupStack::PushL(obj); \
++  obj->ConstructL(); \
++  return obj; \
++} \
++ \
++CSensor_weburl* CSensor_weburl::NewL(ac_AppContext* aAppContext) \
++{ \
++  CSensor_weburl* obj = CSensor_weburl::NewLC(aAppContext); \
++  CleanupStack::Pop(obj); \
++  return obj; \
++} \
++ \
++CSensor_weburl::CSensor_weburl(ac_AppContext* aAppContext) : iAppContext(aAppContext) \
++{}
++/***end***/
++
++NONSHARABLE_CLASS(CSensor_weburl) :
++  public CBase,
++  public MAHLEClientObserver
++{
++  CTOR_DECL_CSensor_weburl;
++
++ public:
++  virtual ~CSensor_weburl();
++
++ private:
++  ac_AppContext* iAppContext; // not owned
++
++  CAHLE* iAhle; // owned
++
++  CDesCArray* iOldUrlArray; // owned
++
++ private: // MAHLEClientObserver
++  virtual void AdaptiveListChanged(TInt aError);
++
++ private:
++  LogDb* GetLogDb() const { return ac_LogDb(iAppContext); }
++
++  void LogDataL();
++};
++
++#endif // __WEBURL_ENABLED__
++
++// --------------------------------------------------
++// sensor array integration
++// --------------------------------------------------
++
++#if defined(SA_ARRAY_INTEGRATION)
++#if __WEBURL_ENABLED__
++#define DECLARE_SENSOR_weburl CSensor_weburl* iSensor_weburl
++#define SENSOR_WEBURL_DESTROY DELETE_Z(self->iSensor_weburl)
++#define SENSOR_WEBURL_CREATE sa_typical_symbian_sensor_create(self->iSensor_weburl = CSensor_weburl::NewL(self->ac), "weburl sensor initialization")
++#define SENSOR_WEBURL_START SENSOR_WEBURL_CREATE
++#define SENSOR_WEBURL_STOP SENSOR_WEBURL_DESTROY
++#define SENSOR_WEBURL_IS_RUNNING (self->iSensor_weburl != NULL)
++#define SENSOR_WEBURL_RECONFIGURE(key, value) sa_reconfigure_ignore_all_keys
++#else
++#define DECLARE_SENSOR_weburl
++#endif
++#endif /* SA_ARRAY_INTEGRATION */
++
++#endif /* __epoc_weburl_hpp__ */
++
++/**
++
++epoc-weburl.hpp
++
++Copyright 2009-2010 Helsinki Institute for Information Technology
++(HIIT) and the authors. All rights reserved.
++
++Authors: Tero Hasu <tero.hasu@hut.fi>
++
++Permission is hereby granted, free of charge, to any person
++obtaining a copy of this software and associated documentation files
++(the "Software"), to deal in the Software without restriction,
++including without limitation the rights to use, copy, modify, merge,
++publish, distribute, sublicense, and/or sell copies of the Software,
++and to permit persons to whom the Software is furnished to do so,
++subject to the following conditions:
++
++The above copyright notice and this permission notice shall be
++included in all copies or substantial portions of the Software.
++
++THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
++EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
++MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
++NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
++BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
++ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
++CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
++SOFTWARE.
++
++ **/
+diff --git a/daemon/src/module.mmp.in b/daemon/src/module.mmp.in
+index 4a64e96..602ba83 100644
+--- a/daemon/src/module.mmp.in
++++ b/daemon/src/module.mmp.in
+@@ -89,6 +89,10 @@ library cntmodel.lib // CContactDatabase
+ //library logcli.lib // CLogClient
+ //library pbkeng.lib // CPbkContactEngine
+ 
++<% if $WEBURL_ENABLED %>
++library ahleclient.lib
++<% end %>
++
+ library euserhl.lib    // High-Level APIs
+ 
+ library libc.lib       // PIPS
+@@ -153,6 +157,9 @@ source epoc-profile.cpp
+ <% end %>
+ source epoc-s60-version.cpp
+ source epoc-smsevent.cpp
++<% if $WEBURL_ENABLED %>
++source epoc-weburl.cpp
++<% end %>
+ source er_errors.c
+ source er_errors_cxx.cpp
+ source kr_controller.c
+diff --git a/daemon/src/sa_array.cpp b/daemon/src/sa_array.cpp
+index 5560e3e..10899e8 100644
+--- a/daemon/src/sa_array.cpp
++++ b/daemon/src/sa_array.cpp
+@@ -85,9 +85,10 @@
+ #include "sa_sensor_mark.h"
+ #endif
+ 
+ #include "epoc-callstatus.hpp"
+ #include "epoc-cellid.hpp"
+ #include "epoc-smsevent.hpp"
++#include "epoc-weburl.hpp"
+ 
+ // This file is generated, and included only once here. Code for
+ // creating, destroying, starting, and stopping sensors comes from
+@@ -130,9 +131,10 @@ extern "C" struct _sa_Array
+ #if __MARK_ENABLED__
+   sa_Sensor_mark* iSensor_mark;
+ #endif
+   DECLARE_SENSOR_callstatus;
+   DECLARE_SENSOR_cellid;
+   DECLARE_SENSOR_smsevent;
++  DECLARE_SENSOR_weburl;
+ };
+ 
+ /* Sensor starting. (Statement.)
+diff --git a/daemon/src/sa_sensor_list_spec.ss b/daemon/src/sa_sensor_list_spec.ss
+index 13b908a..e8c5cfe 100755
+--- a/daemon/src/sa_sensor_list_spec.ss
++++ b/daemon/src/sa_sensor_list_spec.ss
+@@ -134,6 +134,21 @@ exec mzscheme --name "$0" --eval "(require scheme (lib \"usual-4.ss\" \"common\"
+              (args ,(arg (type (ptr-to (cconst 'char))) (name 'operatorName)))
+              (bindings
+               (binding (index 2) (type text) (value "operatorName, strlen(operatorName)") (dispose static)))))
++
++    ;; weburl
++    (sensor (name weburl) (platforms symbian)
++            (cpp-condition "__WEBURL_ENABLED__")
++            (sql-schema "create table weburl_scan (unixtime INTEGER, name TEXT, url TEXT);")
++            (sql-statements "insert into weburl_scan (unixtime, name, url) values (?, ?, ?);")
++            (log-insert-api
++             (args
++              ,(arg (type (ptr-to (cconst 'char))) (name 'name))
++              ,(arg (type (ptr-to (cconst 'char))) (name 'url))
++              )
++             (bindings
++              (binding (index 2) (type text) (value "name, strlen(name)") (dispose static))
++              (binding (index 3) (type text) (value "url, strlen(url)") (dispose static))
++              )))
+     
+     ;; profile (needs a variant targeting new extended plugin)
+     (sensor (name profile) (platforms symbian)
+diff --git a/daemon/tools/dump-db-file.sh b/daemon/tools/dump-db-file.sh
+index e398ab9..7e5fbf6 100644
+--- a/daemon/tools/dump-db-file.sh
++++ b/daemon/tools/dump-db-file.sh
+@@ -42,6 +42,9 @@ sqlite3 $1 "select datetime(unixtime, 'unixepoch'), value, name from profile_sca
+ echo KEYPRESS
+ sqlite3 $1 "select datetime(unixtime, 'unixepoch'), presstimes from keypress_scan;" 
+ 
++echo WEBURL
++sqlite3 $1 "select datetime(unixtime, 'unixepoch'), name, url from weburl_scan;" 
++
+ echo APP MESSAGES
+ sqlite3 $1 "select datetime(unixtime, 'unixepoch'), message from appmessage_log;"
+ 
+diff --git a/daemon/variants/base.ss b/daemon/variants/base.ss
+index cd64382..5ff7766 100644
+--- a/daemon/variants/base.ss
++++ b/daemon/variants/base.ss
+@@ -260,6 +260,9 @@ project must implement.
+   (define/public (have-profileengine-lib.attr)
+     (>= (s60-vernum.attr) 31))
+   
++  (define/public (have-ahle-lib.attr)
++    (= (s60-vernum.attr) 30))
++  
+   (define/public (have-anim.attr) #t)
+ 
+   (define/public (have-euserhl.attr) #t)
+@@ -360,6 +363,10 @@ project must implement.
+     (sublist? '(ReadDeviceData)
+               (capabilities)))
+ 
++  (define/override (weburl-enabled.attr)
++    (and (send this have-ahle-lib.attr)
++         (sublist? '(ReadDeviceData WriteDeviceData) (capabilities))))
++  
+   (define/override (profile-enabled.attr)
+     (or (send this have-profileengine-lib.attr)
+         (sublist? '(ReadDeviceData) (capabilities))))
+diff --git a/daemon/variants/devel.var.ss b/daemon/variants/devel.var.ss
+index ca6d9c0..c6aa34a 100644
+--- a/daemon/variants/devel.var.ss
++++ b/daemon/variants/devel.var.ss
+@@ -28,6 +28,7 @@ For development and testing.
+     (define/override (profile-enabled.attr) #t)
+     (define/override (keypress-enabled.attr) #t)
+     (define/override (inactivity-enabled.attr) #t)
++    (define/override (weburl-enabled.attr) #t)
+ 
+     (define/override (feature-remokon.attr) #t)
+ 

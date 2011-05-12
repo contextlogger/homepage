@@ -1,0 +1,89 @@
+ContextLogger2 Data Analysis Guide
+
+%%mtime(%c)
+
+%!includeconf: config.t2t
+%! Options : --toc --enum-title
+%!preproc(xhtml):  '(__[A-Z_]+__)' '``\1``'
+%!postproc(xhtml): '&lt;&lt;([a-z_]+)&gt;&gt;' '<i>\1</i>'
+
+h1. Interpreting Log Data
+
+h2. Call Status (Symbian)
+
+The logged integer values for the "callstatus" sensor have the following interpretations:
+
+| 0 | The status is unknown. |
+| 1 | Idle line (no active calls). |
+| 2 | Call dialling. |
+| 3 | Call ringing. |
+| 4 | Call answering. |
+| 5 | Call connecting. |
+| 6 | Call connected. |
+| 7 | Call is undergoing temporary channel loss (it may or may not be reconnected). |
+| 8 | Call disconnecting. |
+| 9 | Call on hold. |
+| 10 | Call is transferring. |
+| 11 | Call in transfer is alerting the remote party. |
+
+(The above come from the Symbian API documentation.)
+
+As for the call termination reason codes, see [this Forum Nokia wiki page http://wiki.forum.nokia.com/index.php/TSS001320_-_Interpreting_TCallInfoV1::iExitCode_value]. In the log, the ``osterm`` column has the OS-specific component of the code, and the ``netterm`` column has the network-specific component of the code. The ``netterm`` codes, in the event of the call terminating due to the network or the remote party's actions, should be documented in the ``exterror.h`` Symbian header file, available in some SDKs.
+
+h2. Keypresses (Symbian)
+
+The "keypress" sensor only records the keypress times, not the keycodes. These are represented using a difference encoding, calculated by adding the ``base`` time to each of the recorded ``times``. This way one gets the Unix time for each, i.e., the number of seconds since the Unix epoch.
+
+h2. Indicator (Symbian)
+
+Two codes are logged for the "indicator" sensor. The latter shows what indicators are available on the particular device, and the value should be a constant. The former value indicates which indicators are visible on the phone screen. Both values are bit fields expressed as a single integer, with the bits interpreted as follows:
+
+| 1 | Charger connected indicator. |
+| 2 | Network available indicator. |
+| 4 | Call in progress indicator. |
+
+h2. Battery Status (Symbian)
+
+Two codes are logged for the "battery" sensor. The latter shows the battery charge level (as a percentage). The former value indicates battery status, with the values interpreted as follows:
+
+| 0 | Power status unknown. |
+| 1 | Powered by battery. |
+| 2 | Battery connected, but with external power. |
+| 3 | No battery connected, on external power. |
+| 4 | Power fault. |
+
+h2. Network Registration Status (Symbian)
+
+| 0 | Registration status unknown. |
+| 1 | Not registered and no service detected. |
+| 2 | Emergency calls only. |
+| 3 | Searching for a network. |
+| 4 | Registered, network busy. |
+| 5 | Registered on home network. |
+| 6 | Registration denied. |
+| 7 | Registered, roaming. |
+
+h2. Network Signal Strength (Symbian)
+
+The first logged value is signal strength in dBm (between -123 and -1, inclusive, or 0 for undefined). The second value is the number of bars (between 0 and 7, inclusive).
+
+h2. Ambient Light (Qt Mobility)
+
+| 0 | Undefined. |
+| 1 | Dark. |
+| 2 | Twilight. |
+| 3 | Light. |
+| 4 | Bright. |
+| 5 | Sunny. |
+
+h2. Tapping (Qt Mobility)
+
+Two values are recorded. The first one specifies the direction, but tends to be 0 (for unknown) on many devices. In cases where directions have been reported, look at [this table
+http://doc.qt.nokia.com/qtmobility-1.1.0/qtapreading.html#TapDirection-enum] for interpretations. The second value is 1 for double taps, and 0 for single taps.
+
+------------------------------------------------
+_signature_
+
+% Local Variables:
+% mode: longlines
+% End:

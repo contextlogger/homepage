@@ -1,0 +1,79 @@
+ContextLogger2 OAQ (Occasionally Asked Questions)
+
+%%mtime(%c)
+
+%!includeconf: config.t2t
+
++ Is **introducing new sensors** easy?
+
+  - We've tried to avoid any arduous requirements that would make it harder to implement new sensors than it already is.
+
+  - Basically, sensor scanners may be implemented in C, C++, or Lua. They are objects for which at least two operations must be defined, namely create and destroy, but there is no particular class interface to implement or anything. They must observe for sensor events without busy looping or blocking the main thread; typically on Symbian they would play ball with the Symbian event loop. There is no requirement as to sensor data representation, the scanner must simply insert the data into an SQLite database using whatever format or schema they like. Errors are generally to be handled internally, and possibly logged; there is the option of requesting the whole logger process to exit, to possibly be recreated later by the watchdog. That is basically it.
+
++ **How much data** does CL2 approximately collect per week?
+
+  - A lot depends on the sensor set used, the sampling frequency, and the amount of activity on the phone, but for instance one 1-month long test run yielded slightly less than 2 MB worth of data.
+
++ Is **installation** only a matter of installing a single client on the device, without anything else being required?
+
+  - Things are almost that simple but not quite. Only a single piece of client software is required to collect data, but that client must be started somehow. The different options include:
+
+    - One option is to embed the client in another application, in which case it will run when the host application is running. 
+
+    - There is also the option of building the client with a (very basic) GUI of its own, in which case it can be started and stopped easily, and can run independent of any other application.
+
+    - A typical solution would be to install the watchdog program, which takes care of starting the logger client.
+
+    - Yet another option is to install the provided launcher application, and use that to control the logger client.
+
++ Does CL also collect the **UIDs of applications** (so that one need not identify focused applications based on their name alone).
+
+  - Yes.
+
++ Is it possible to send trial users questions by having CL2 present pop-up dialogs to the users? In other words, is **"experience sampling"** supported?
+
+  - No, and this feature is not on the roadmap.
+
++ What **devices** are supported?
+
+  - In principle all S60 3rd and 5th Edition devices should be supported, at least when it comes to basic functionality. (The software may work on Symbian^3 devices, but we have yet to test this.) Not all functionality is necessarily available on all devices, as some of the functionality is implemented in terms of APIs that are not available on all platform versions. Also, we have not tested the software on the multitude of different S60 phones. We primarily test on S60 3rd FP1 and S60 5th devices.
+
++ What **format** is the data in?
+
+  - In SQLite3 database file format. The format is, to our knowledge, platform independent.
+
+  - The database schemas we are using are rather simplistic, but these can be changed as required to better support efficient on-device queries.
+
++ How can one get **access to the data**?
+
+  - One can simply copy the data file off the device. There is also support for uploading said files automatically at predefined times via HTTP or HTTP over SSL.
+
+  - Support for doing queries on the active dataset from other local applications (via the Symbian client/server protocol) and from remote applications (via XMPP) is partially implemented.
+
++ Who **owns the data**?
+
+  - This is not our concern. The data collected by CL2 does not go to HIIT servers unless CL2 is specifically configured to upload it there.
+
++ Is the **privacy and anonymity** of users guaranteed?
+
+  - The data that is on the device is not encrypted. Uploads are optional, and can optionally be done over SSL. SSL provides server authentication and confidenciality of the data while in transit. A username is sent alongside each upload.
+
+  - These factors are just one part of the overall privacy/anonymity picture, and as such neither guarantee or preclude privacy and anonymity of users.
+
++ Is it possible for **users to view the data** being collected regarding their device use?
+
+  - There is no plan to provide a user-friendly interface for this purpose, but neither are we planning to take steps to prevent people from being able to access the data.
+
+  - Something to note, though, is that once a chunk of data is uploaded to a server, the local copy is deleted.
+
++ Does the software really work on the **Nokia N80**?
+
+  - Yes, but the system software has to be bug-free enough, so upgrade to more recent firmware as necessary. Version 5.0719.0.2 at least should work, but is not available for all regions, so you may have to change the product code of your phone to be able to get the upgrade.
+
+
+------------------------------------------------
+_signature_
+
+% Local Variables:
+% mode: longlines
+% End:

@@ -1,0 +1,70 @@
+ContextLogger2 Quick Start
+
+%%mtime(%c)
+
+%!includeconf: config.t2t
+
+h2. Quick Start without Uploads
+
++ Install a suitable installation package onto your phone using your preferred installation method. For example, you might use the device web browser to download a [logger demo program demo.html] from these pages.
+
++ From the application menu, choose "CL2 App" to start the application. It will keep running and logging until you "Exit" it. You may leave it running on the background, but mind your battery if you do, particularly if the demo program is built with GPS support and your phone has GPS hardware.
+
+
+You can manually retrieve the log file directly from the device when the logger process is not running. The database file is by default named ``e:\data\cl2\log.db``, but you can change this by creating a configuration file named ``c:\data\cl2\config.txt``, and for example having it say
+
+```
+database_dir = "c:\\data\\cl2"
+database_disk_threshold = 50
+```
+
+to have the log file stored on the ``c:`` drive instead, and to insist that the logger leave at least 50MB free on that drive.
+
+After editing the configuration file, you must restart any running logger for changes to take effect.
+
+h2. Setting Up Log Uploads
+
++ Set up a web server for receiving log files.
+
+  - The uploads are via multipart HTTP post, and the part with the SQLite3 log file is named ``logdata``. You can use PHP or whatever to extract and store the logfile. (See [Deployment Guide deployment.html] for information on setting up SSL.)
+
++ In the configuration file (``c:\data\cl2\config.txt``), specify the upload URL and a username identifying the device doing the upload. For example:
+
+```
+username = "myusername"
+upload_url = "https://myhost.mydomain/upload"
+```
+
++ Optionally, in the configuration file, you may forbid uploads over a mobile network that does not have a specific [mobile country code http://en.wikipedia.org/wiki/Mobile_country_code]. This is to avoid roaming charges. To only allow uploads in a Finnish network, for example, you would write:
+
+```
+mcc = 244
+```
+
++ To trigger an upload with the demo application, use the "Upload now" menu option. (Timed uploads are also supported, but not configurable via the demo application.)
+
+
+h2. Setting Up Remote Control Support
+
++ Set up an XMPP (Jabber) server.
+
++ Create an account for both the controller and the controlled, and set them up as buddies.
+
++ In the configuration file (``c:\data\cl2\config.txt``), specify the XMPP server to connect to, and the Jabber ID and password of the logger. For example:
+
+```
+remokon_host = "myhost.mydomain"
+remokon_port = 5222
+remokon_password = "mypassword"
+jid = "myusername@myhost.mydomain/Mobile"
+```
+
++ To start a remote control session, use the "Enable remote control" menu option in the demo application. (The session is automatically closed after 5 minutes of remote control inactivity.) At the controlling end, use any XMPP-supporting chat client to send commands.
+
+
+------------------------------------------------
+_signature_
+
+% Local Variables:
+% mode: longlines
+% End:

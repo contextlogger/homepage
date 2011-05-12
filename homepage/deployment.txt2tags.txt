@@ -1,0 +1,97 @@
+ContextLogger2 Deployment Guide
+
+%%mtime(%c)
+
+%!includeconf: config.t2t
+%! Options : --toc --enum-title
+%!preproc(xhtml):  '(__[A-Z_]+__)' '``\1``'
+%!postproc(xhtml): '&lt;&lt;([a-z_]+)&gt;&gt;' '<i>\1</i>'
+
+h1. Logger Configuration
+
+The logger program has a lot of functionality, and it necessarily requires some site and user specific configuration. Otherwise it aims to just run and run without much interaction with the outside world, and hence here our focus is primarily on explaining how to do the configuring.
+
+In the case of ContextLogger2, build time configuration also plays an important role. For information on that, see [builder's guide building.html].
+
+h2. Configuration File
+
+There are a number of configuration parameters that may be set in a textual configuration file, without having to rebuild the binary. These parameters are typically ones that are not easy to decide at build time, as they may depend on user preferences, mobile operator, or the specific device used. Some of the parameters can also be overridden dynamically at runtime. On the other hand, there are also ones that we specifically did not want to be dynamically configurable, for security reasons; these include ``username`` and ``upload_url``.
+
+The definitions for these parameters reside in a configuration file whose pathname is ``c:\data\cl2\config.txt``. An example of the content of the file is given below. The content must be a piece of valid Lua code that assigns the configuration parameters to global variables of known names.
+
+```
+username = "teemuteekkari"
+upload_url = "https://myhost.mydomain/upload"
+compress_logs = true
+remokon_host = "big.brother"
+remokon_port = 5222
+remokon_password = "BigBrother123"
+jid = username .. "@" .. remokon_host .. "/Mobile"
+iap = function () return cl2.iap_id_by_name('Elisa Internet') end
+mcc = 244
+operator_name = "Elisa"
+```
+
+h2. Dynamic Configuration
+
+Dynamic configuring of the logger program is possible remotely via XMPP (Jabber). It is also possible locally for Symbian builds, which implement a configuration protocol based on the Symbian client/server framework. The Launcher application makes use of the latter protocol to implement its logger configuration commands. More flexible configuration than that provided by the launcher is possible by using the protocol directly.
+
+For easy deployment of the same initial configuration on multiple devices, it is also possible to simply create a configuration database file using SQLite3, on the PC, say, and then store that on all the devices as ``c:\data\cl2\config.db``.
+
+For instance, suppose there is a trial involving 50 phones, and for all of them one wants to set the GPS scan interval as 10 minutes. There is presently no compile-time configuration option for this, nor is there a parameter for this in the static configuration file. Instead, one might create a configuration database specifying the desired interval of 10 minutes (600 seconds), and install this as a SIS file, say, in addition to the software itself. The configuration file with the desired parameter could be created with the following commands:
+
+```
+sqlite3 config.db "create table configuration (name TEXT UNIQUE, value TEXT);"
+sqlite3 config.db "insert or replace into configuration (name, value) values \
+  ('sensor.gps.interval', 'return 600');"
+```
+
+h2. Battery Considerations
+
+Note that the "gps" and "btprox" sensors consume a lot of battery, and for this reason you may want to carefully consider whether you want to enable these sensors or not. Disabling of sensors can be done both via compile-time and dynamic configuration.
+
+The remote control facility is also a concern due to its constant use of the cellular radio. Particularly if you are not anyway constantly updating you Facebook feed or whatnot, the battery hit could be considerable. Remote control can be disabled at compile time, or simply by leaving it unconfigured. Also, you can dynamically start and stop it, or disable/enable its automatic activation upon logger process launch.
+
+h1. Server Configuration and Integration
+
+h2. Setting Up Log Uploads
+
+h3. Configuring Upload Parameters
+
+The access point to use and the upload frequency can be modified dynamically (via the Launcher program, or more generally by making a request via the CL2 client library), but the rest of it must be specified either already at build time, or in the configuration.
+
+An upload configuration could look something like:
+
+```
+username = "john_doe"
+upload_url = "https://big.brother/upload.php?username=" .. username
+iap = function () return cl2.iap_id_by_name('Elisa Internet') end
+mcc = 244    -- Finland
+compress_logs = true
+```
+
+h3. Receiving Log Uploads
+
+There is a large number of different web technologies one might use for receiving log files on the server side. The uploads arrive via multipart HTTP POST, and the part with the SQLite3 log file is named "logdata". The username is encoded in the filename of the part.
+
+Due to the prevalence of PHP in the web hosting world, we have (despite not being PHP experts) written our example log file collector program in PHP. You might adapt it for receiving log files on your chosen server.
+
+- [upload receival script upload.php.html]
+
+
+In PHP receiving multipart posts is straightforword. Basically one just has to inspect the "magic" value ``$_FILES["logdata"]``, which is automatically set by PHP. ``$_FILES['logdata']['tmp_name']`` gives the pathname of the temporary file in which the log file is stored, while ``$_FILES['logdata']['name']`` gives the client-specified name of the file.
+
+h3. Setting Up SSL for Uploads
+
+Doing uploads over SSL is a good idea as it achieves server authentication and transport-time data confidentiality and integrity.
+
+To do uploads via SSL, simply specify "https:" in the URL instead of "http:". Naturally then you **must** configure SSL support on the server side as well. If you use a self-signed certificate on the server, you will also have to install the appropriate CA cert on the client, but this is not always easy with S60 devices. Some phones (such as recent Nokia Eseries ones) allow you to permanently accept a cert sent by a server; with such phones you thus have the option of just launching the logger client, and then, upon first upload, accepting the certificate permanently for the upload site. Yes, there will be a pop-up dialog in that case.
+
+On phones where this is not an option you must install a certificate, by sending it to the phone and then invoking the cert manager on it. You must use the DER format, as the phone will not accept PEM. You may want to refer to [Nokia's document about certificate installation http://sw.nokia.com/id/a60ed5ab-c2fc-486c-89d0-2695b67ffec4/Installing_Certificates_to_S60_3rd_Edition_Devices_v1_1_en.pdf]. The document unfortunately does not tell you much of anything about certificate creation; just installing a CA cert is not enough to get rid of popup warnings unless you get the cert content right. But based on experimentation, the key here seems to be that Common Name on the cert must exactly match the domain name of your server, otherwise you will get a popup for every single connection complaining about an untrusted server. Unless, indeed, you device offers the option of accepting the cert permanently for the site.
+
+------------------------------------------------
+_signature_
+
+% Local Variables:
+% mode: longlines
+% End:

@@ -1,0 +1,178 @@
+ContextLogger2 Features
+
+%%mtime(%c)
+
+%!includeconf: config.t2t
+
+h1. Features Overview
+
+- Supports Symbian OS v9-up as a target platform, and Linux as a development platform.
+
+- Non-intrusive, persistent, and robust data logging.
+
+  - A number of "sensors" supported (many of which may be individually enabled or disabled at runtime).
+
+  - By default built to run on the background without any visible GUI.
+
+  - An optional, provided watchdog application may be installed to start the application up at boot, and to reawaken it after error situations.
+
+- Automatic uploads to a server at configurable intervals, via a configurable access point, by HTTP POST to a configurable URL.
+
+  - HTTP over SSL is supported.
+
+- Remote configurability via an XMPP/Jabber based protocol.
+
+  - SASL authentication and TLS encryption is supported.
+
+  - Use any compatible Jabber client and server for adjusting configuration parameters.
+
+  - Remote control sessions triggered via SMS.
+
+- SQLite3 database based logging format.
+
+  - Software for inspecting and querying database files is readily available for a variety of platforms.
+
+  - Optional Gzip compression of data files.
+
+- Easy to install and configure (hopefully).
+
+  - The phone client software is available packaged as SIS file(s).
+
+  - "Static" configuration can be specified in a text file.
+
+  - "Dynamic" configuration can be adjusted: using a provided application; from other local applications via a Symbian client/server session; or remotely via a Jabber-based protocol.
+
+
+== Supported Context Data Sources ==[sensors]
+
+- Ambient light
+
+  - surrounding environment light level (dark, twilight, light, bright, sunny)
+
+- Application focus
+
+  - application focus changes (name and UID of focused application)
+
+- Application message
+
+  - a textual message from another application
+
+  - allows other applications to let CL2 take care of log storage and uploading
+
+- Battery status
+
+  - status (powered by battery, on external power with battery, without battery)
+
+  - battery charge level (percentage)
+
+- Bluetooth proximity
+
+  - BT proximity scanning (BT names and addresses of discovered devices)
+
+  - scanning frequency is configurable
+
+- Call status
+
+  - call status changes (idle, ringing, connected, on hold, etc.)
+
+  - including remote party phone number
+
+  - including remote party name (from Contacts) when available
+
+  - including call termination status code(s)
+
+- Double tap
+
+  - tap sensor events (possibly including direction)
+
+  - many devices with accelerometer hardware can report taps, and a double tap is where two taps occur in quick succession and in the same direction
+
+- Flightmode
+
+  - flight mode status changes (changed to ON or changed to OFF)
+
+- GPS
+
+  - position scanning using satellite-based positioning (coordinates, altitude, accuracy values, etc.)
+
+  - "best" satellite-based positioning method chosen automatically (typically A-GPS)
+
+  - sampling frequency is configurable
+
+- GSM cell ID
+
+  - cell ID changes (new cell ID value)
+
+- HTTP request URLs
+
+  - URL for each HTTP request made through the Symbian native HTTP stack
+
+- Inactivity
+
+  - activity status changes (just became active, or has been idle for a certain amount of time)
+
+- Indicators
+
+  - Standby screen indicator changes (charger connected, network available, call in progress)
+
+- Location
+
+  - a sensor for logging position changes in a battery-frugal manner
+
+  - currently: does satellite positioning with integrated hardware (network assisted unless roaming data is forbidden), but only briefly, only after GSM cell ID changes, and not too frequently
+
+  - scanning frequency limit and satellite positioning max time interval are configurable
+
+- Keypresses
+
+  - keypress times, but no keycodes (for privacy reasons)
+
+- Music playback
+
+  - "Music player" application status changes (playback started, paused, track changed, playback volume changed, etc.)
+
+  - details for the playing track (URL, title, artist, album)
+
+- Network operator
+
+  - operator "long" name (of network to which registered)
+
+- Network registration status
+
+  - status (no service, emergency only, on home network, roaming, etc.)
+
+- Network signal strength
+
+  - signal strength (in dBm)
+
+  - number of signal bars displayed
+
+- Profile
+
+  - profile changes (name and ID of activated profile)
+
+- Proximity
+
+  - whether something is very close to the device (a boolean value)
+
+- SMS receival/sending
+
+  - SMS event type (message sent or received)
+
+  - including remote party phone number
+
+  - including remote party name (from Contacts) when available
+
+  - optionally: message body text
+
+- Web browser adaptive history list changes
+
+  - "Name" and "Address" (URL) for new entries
+
+
+------------------------------------------------
+_signature_
+
+% Local Variables:
+% mode: longlines
+% End:

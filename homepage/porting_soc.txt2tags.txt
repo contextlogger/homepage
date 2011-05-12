@@ -1,0 +1,67 @@
+ContextLogger2 Port to a Non-Symbian Smartphone Platform
+GSoC 2011
+%%mtime(%c)
+
+%!includeconf: config.t2t
+%! Options : --toc --enum-title
+
+h1. ContextLogger2
+
+[ContextLogger2 index.html] (CL2) is a software tool for smartphone data collection, created primarily with research purposes in mind. It can, for instance, be used in user studies for collecting and recording context information such as GPS and GSM cell ID readings, keypress times, application focus changes, etc. 
+
+h2. Background: Porting Motivation
+
+ContextLogger2 presently only fully supports the Symbian platform, which has long been the leading smartphone platform, but as Symbian is now both losing market share and being phased out by Nokia, it is time to port CL2 to another smartphone platform. This is to retain support for a reasonable portion of the smartphone installed base, which is important for user studies in which the software is installed on users' existing personal phones.
+
+h2. Background: Technology Considerations
+
+h3. Preferred Target Platforms
+
+Ideally, the chosen smartphone platform would have considerable market share (Android, iOS), or at least considerable projected market share (Bada). Also, to enable required functionality, the platform should allow for background processes without significant restrictions or jailbreaking (Android, Bada v2, Maemo, MeeGo, webOS). Hence Android would seem like the best target, and Bada v2 the second best (if/when it becomes available with promised features). Still, porting to a less popular platform or doing a more restricted port is better than supporting Symbian alone.
+
+h3. Platform Choices and Code Reuse
+
+Potential for code reuse is secondary compared to functionality and reach, but significant nonetheless. To allow for source code sharing with the CL2 Symbian implementation, the platform should support C and C++ (iOS, Maemo, MeeGo, webOS, and to a lesser degree Android and Bada), both the languages and their standard libraries. A good degree of POSIX API support (iOS, Maemo, MeeGo, webOS) would ease porting of third party libraries. Preferably the native API would be in a C or C++ compatible language for ease of integration (Bada, iOS, Maemo, MeeGo, webOS), but it is still possible to invoke e.g. Android Dalvik methods via JNI.
+
+h1. Suggested Porting Procedure
+
+This is a suggested porting procedure for ContextLogger2 ports that make use of the existing codebase. Different approaches may be proposed.
+
+h2. Task: Set Up Build Support for the Target Platform
+
+The initial task would be to get the logger building for the target platform, or rather as much of it as will build. This involves writing a build configuration file, and makefiles for the preferred target platform toolchain.
+
+h2. Task: Get a Minimal Logger Program Built
+
+The logger configuration system allows many of the less central features (such as uploads and remote control) to be disabled at build time. The non-optional parts include configuration and logging facilities, which cannot be disabled. These are implemented in terms of SQLite3 and Lua. Once you have these two libraries available, getting the program running should not be hard.
+
+On some platforms SQLite3 and Lua may already be available with a public, standard API, in which case using them is a matter of editing the makefile accordingly. If not, they can be ported and built as static libraries first. Both libraries are quite easy to port, and indeed we have Symbian ports of both in the CL2 codebase. Lua should port with minimal effort, but you do require some form of a non-local return mechanism, whether it's C++ exceptions or ``setjmp`` and ``longjmp`` or something else. SQLite3 may require some porting effort at the filesystem access level, but expect in-memory databases to work out of the box.
+
+h2. Task: Provide a Mechanism for Starting/Stopping the Logger
+
+There must naturally be a way to start and stop the logger as required (without having to run it from a console), and there are different ways to do this, but at least some mechanism must be provided. The Symbian implementation provides the option of building a GUI version of the application, which can be manually started as required by clicking an icon. The Symbian version also provides a way to start the logger at boot, or to have it automatically restarted if it dies. There is also a separate Launcher application that can be used to interact with the logger when it is running as a "headless" background process.
+
+A good starting point for a new port would be to give the logger a minimal GUI that may be used to control it.
+
+h2. Task: Implement a Couple of Sensors
+
+A context logger is not much of a context logger unless it does some context information sensing, and hence at least a couple of sensors should be implemented. Look at the platform API documentation and current [list of sensors features.html#sensors] available in the Symbian version for ideas, or ask around for requirements in currently ongoing or planned user studies.
+
+Most of the sensor implementations currently in CL2 are Symbian specific. There are some sensors implemented in terms of Qt Mobility APIs which might work on some other platforms (Maemo, MeeGo).
+
+h2. Task: Implement an Uploader
+
+A central feature is to support logfile uploads to a server over HTTP, or preferably HTTPS. ContextLogger2 currently includes a Qt-based implementation, and platforms for which Qt is available (Maemo, MeeGo, possibly Android) should only require building of the existing uploader. For other platforms a separate implementation is required, perhaps exploiting a native HTTP stack, which modern platforms are likely to include.
+
+h2. Extra Task: Implement a Remote Control Facility
+
+A nice to have feature is a remote control facility that allows for remote status queries and commands to be sent. The current logger implements this feature by utilizing Symbian native SMS trigger processing and a Qt-based XMPP library.
+
+One can get creative here. On platforms which provide an energy-efficient push notification mechanism, using that instead of SMS may make sense; the Qt-based Ovi Notifications API offered by Nokia is not yet stable enough for this purpose. And a platform without Qt or any XMPP library might for instance have support for social networking, making it an option to communicate via Twitter, say.
+
+------------------------------------------------
+_signature_
+
+% Local Variables:
+% mode: longlines
+% End:

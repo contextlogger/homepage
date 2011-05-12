@@ -1,0 +1,100 @@
+ContextLogger2 Hacking
+
+%%mtime(%c)
+
+%!includeconf: config.t2t
+%! Options : --toc --enum-title
+%!preproc(xhtml):  '(__[A-Z_]+__)' '``\1``'
+
+h1. Logger
+
+h2. General Design Guidelines
+
+The implementation of the logger daemon has been influenced by these guidelines:
+
+- Be unintrusive.
+
+  - Do not bother the user with questions.
+
+  - Important and infrequent error messages may be displayed.
+
+- Treat data sources uniformly, for purposes of maintainability.
+
+  - Each sensor should have its own logger "active object" that runs independently of others.
+
+  - Code generation may be utilized in integrating a sensor object with the rest of the framework. (The database access boilerplate code is presently automatically generated for most sensors.)
+
+- Do not waste resources.
+
+  - Frequently executed code (as typically found in sensors) should be written tightly.
+
+  - No heavy runtimes are to be used (unless the platform requires it).
+
+  - Use compilers for optimization and increased abstraction --- "execute" code already at compile time, and treat C (and C++) as portable assembly.
+
+  - Consider including compile-time options for disabling added features, to allow for optimization for a given use case by removing unneeded features.
+
+  - Particularly for energy-hungry "active" sensors, make it possible to configure the scanning frequency at runtime, and to start/stop the sensor at any time, e.g., to regulate battery consumption.
+
+- Be platform-independent where feasible and sensible.
+
+  - There currently is no dominant smartphone platform, and the platform landscape is evolving at a fast pace. There are standard or widely available languages and libraries, however, so favor them for reasons of portability.
+
+  - Consider abstracting away machine specifics (such as size and endianness of data items) in your code.
+
+  - Hide platform-dependencies under interfaces that could potentially be implemented for other platforms as well.
+
+- Strive for robust error handling.
+
+  - Try to ensure that errors that matter do not go unnoticed by the logger.
+
+  - Consolidate recoverable error handling to suitably high-level code that has enough context information to actually decide how to handle an error. This way you also avoid cluttering all of your code with error handling logic.
+
+  - And yes, also handle out-of-memory errors gracefully.
+
+    - In particular, ensure that any Qt or GLib out-of-memory errors are treated as fatal as said libraries were not originally designed to support OOM recovery, and may potentially leak resources in out-of-memory error situations.
+
+    - In fact, for consistency, better consider all out-of-memory errors as fatal. Still, log any and all errors before daemon process exit if possible.
+
+
+h2. Adding a New Sensor
+
+The steps to take when adding a new sensor are typically like this:
+
++ Specify a database table for recording the sensor readings in ``src/sa_sensor_list_spec.ss``. If you want a compile-time option for the sensor, specify it here; something like ``__SENSORNAME_ENABLED__``.
+
++ If you have a compile-time option for the sensor, enable it for desired variant builds by editing the ``variants/*.var.ss`` files. If you want to compute a default setting based on other compile-time configuration options, you can do this in ``variants/base.ss``.
+
++ Take a similar sensor implementation as a template for the interface and implementation files. (An example of such files would be ``src/epoc-cellid.hpp`` and ``src/epoc-cellid.cpp``.) Copy, rename, and modify to implement your required sensor.
+
++ Add an ``#include`` for the header file of your sensor in ``src/sa_array.cpp``. Also add a ``DECLARE_SENSOR_sensorname`` style declaration, or otherwise declare your sensor active object in the ``_sa_Array`` object.
+
++ List your implementation file in ``Makefile`` and/or the ``src/module.mmp.in`` file as appropriate. (The former is required for Linux builds, whereas the latter is required for Symbian builds.) Again, if you had a compile-time option for your sensor, you may want to make use of it here.
+
++ If your sensor implementation relies on system DLLs, you should ensure they are listed in ``Makefile`` and/or ``src/module.mmp.in`` as appropriate. Again, if you had a compile-time option for your sensor, you may want to make use of it here; this is particularly important if the libraries used are not included in all SDKs.
+
+
+As an example of the code required for a single sensor, below is a patch showing a sensor implemented based on the [Adaptive History List API http://wiki.forum.nokia.com/index.php/Adaptive_History_List_API]:
+
+- [``weburl`` sensor patch weburl-sensor.diff]
+
+
+h1. Watchdog
+
+- [state graph states.png]
+
+
+h1. Tools
+
+h2. Koog
+
+[Koog http://korpi.hiit.fi/koog/] is a mixed-code generation tool that we have used in maintaining the logger codebase, mostly interactively under Emacs. In case you're wondering about the ``/***koog***//***end***/`` style comments found in the code. If these comments get on the way, feel free to delete them. It //is// quite possible to maintain the boilerplate code manually as well.
+
+
+------------------------------------------------
+_signature_
+
+
+% Local Variables:
+% mode: longlines
+% End:

@@ -1,0 +1,22 @@
+ContextLogger2 Guides
+
+%%mtime(%c)
+
+%!includeconf: config.t2t
+%!preproc(xhtml):  '(__[A-Z_]+__)' '``\1``'
+
+- [deployment guide deployment.html]
+
+- [data analysis guide data_analysis.html]
+
+- [builder's guide building.html]
+
+- [developer's guide developer_guide.html]
+
+
+------------------------------------------------
+_signature_
+
+% Local Variables:
+% mode: longlines
+% End:

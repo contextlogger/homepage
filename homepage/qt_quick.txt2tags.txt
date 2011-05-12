@@ -1,0 +1,73 @@
+Context-Aware Reactive Programming for ContextLogger2 with Qt Quick
+
+%%mtime(%c)
+
+%!includeconf: config.t2t
+%! Options : --toc --enum-title
+
+h1. ContextLogger2
+
+[ContextLogger2 index.html] (CL2) is a software tool for smartphone data collection, created primarily with research purposes in mind. It can, for instance, be used in user studies for collecting and recording context information such as GPS and GSM cell ID readings, keypress times, application focus changes, etc. ContextLogger2 only fully supports the soon-to-be-end-of-lifed Symbian platform, but the codebase avoids Symbian specifics where feasible, instead relying on standard or widely ported APIs such as ISO C, POSIX, STL, GLib, and Qt.
+
+The focus so far in CL2 has been in acquiring (sensing) the context information, but going forward we are interested in better exploiting the acquired information, and facilitating such exploitation by providing better support for programmers to do that.
+
+h2. An Ironic Weakness: Lack of Context Awareness
+
+In the current CL2 design each sensor runs as its own active object, driven by system events and the application event loop. Sensors do logging by themselves and have little interaction with the rest of the system. A weakness of CL2 is that it lacks a convenient mechanism for propagating context information across the system. Such a mechanism would facilitate the implementation of "logical" sensors (sensors that e.g. combine and analyze "raw" physical sensor data from multiple sources to produce more semantically meaningful context events) or more intelligent (or context-aware) behavior of the CL2 logger process (for example, adjusting scanning frequencies of "polling" sensors based on whether the device is being used or moved).
+
+h1. Experimental Solution: Adopt Qt Quick as a Reactive Programming Framework
+
+As a potential approach for modernizing the CL2 architecture to better support context-aware programming one might consider making use of technology such as [Qt Quick http://qt.nokia.com/qtquick/], which supports a form of {{{em}}}reactive programming{{{/em}}} by automatically propagating changes between declared properties. Such a technology might serve as a good basis for automatically propagating relevant context information across the system in an event-driven manner.
+
+In fact, as CL2 already makes use of Qt, adopting Qt Quick as is might be worth trying out, despite it having been designed primarily for defining user interfaces. To be sure, we have yet to determine whether Qt Quick is suitable for such a purpose in its present form, but its programming model certainly seems appealing for context-driven systems.
+
+h2. Background: Qt and Properties
+
+In Qt, any C++ class that derives from the ``QObject`` base class may contain properties declared by means of the ``Q_PROPERTY`` macro, like so:
+
+```
+Q_PROPERTY(QColor color READ color WRITE setColor NOTIFY colorChanged)
+```
+
+See [``changingcolor.hpp`` changingcolor.hpp] and [``changingcolor.cpp`` changingcolor.cpp] for a full example implementation of the ``color`` property.
+
+Note that by defining a ``NOTIFY`` function (here: ``colorChanged``) a property can be made observable, in that its modification emits a signal (here: ``colorChanged``) that is propagated to registered observers. 
+
+The idea in the ContextLogger2 case would be to make all context data updates observable to interested parties (logger internal components) using this mechanism.
+
+h2. Background: QML and Property Propagation
+
+A central part of the Qt Quick technology is the QML language. QML is designed to be primarily a declarative language, and it is also possible to declare properties in QML. The values of declarations are given as freeform JavaScript expressions, and the declarative engine takes care of automatically re-evaluating and updating properties that are affected by changes to other properties. In such a way Qt Quick implements a [{{{em}}}property binding{{{/em}}} http://doc.qt.nokia.com/latest/propertybinding.html] system that enables reactive programming.
+
+Many people praise QML for its convenience and speed of development in GUI programming, and it would be interesting to find out just how convenient it makes the creation of context-driven systems that do not involve direct user interaction, and indeed may remain entirely invisible to the user. Is it still so that most of the functionality can seemingly just be declared instead of implementing by interactively manipulating state? In what way (if any) should Qt Quick be changed to better support the use case of implementing embedded context-driven systems?
+
+h1. Qt Quick Adoption Steps for ContextLogger2
+
+Here we provide a rough sketch of how one might go about integrating Qt Quick with ContextLogger2, and starting to make use of it within the logger daemon.
+
+h2. Task: Make Sensor Data Available to QML
+
+First one should turn some interesting (in terms of implementing intelligent context-adaptive behavior) existing sensors in CL2 to ``QObject``s and in addition to logging the data, also make the data available as properties of the objects. See the [list of context data sources features.html#sensors] currently implemented for Symbian. For those wishing to avoid native Symbian programming, CL2 does have a couple of sensors implemented in terms of Qt Mobility APIs, and it would be possible to implement additional ones.
+
+Once the C++ based sensor objects have been Qt-ified, making ``QObject``s and their properties visible to QML is straightforward, requiring little else but naming an object and registering it with the root QML context (namespace) with the ``QDeclarativeContext::setContextProperty`` method. Also, Qt Mobility already includes QML interfaces for some sensor APIs, which might enable the implementation of some new CL2 sensors in QML.
+
+h2. Task: Set Up a Declarative Engine
+
+The next step would be to instantiate a QML engine within CL2, register the sensor objects with it, and then load some QML code within it. This makes it possible to start implementing some logger features in QML. We do not know (yet) whether its possible to avoid instantiating a ``QDeclarativeView`` and visible QML components to get QML execution started.
+
+h2. Task: Implement New Sensors in QML and JavaScript
+
+With a declarative engine available, it should be possible to implement new sensors in QML. For example, the Location, System Information, and Sensors [QML Plugins http://doc.qt.nokia.com/qtmobility/qml-plugins.html] might enable implementation of new "physical" sensors. Or one might combine existing sensor data sources by implementing new "logical" sensors, for example a sensor that tries to acquire the current position only when the accelerometer indicates movement. To actually enable logging of readings from the QML-based sensors, one would have to expose some database insertion functions to JavaScript from the native side.
+
+h2. Task: Implement Some Controller Logic in QML and JavaScript
+
+Currently all of the core logic of the CL2 logger daemon is written in C and C++. Some of this could be migrated over to QML to make it less work to modify the logic. This would also make it possible to fine tune the logger behavior by editing a QML file rather than recompiling the program binary, making some of the current use of Lua-based configuration files unnecessary.
+
+For example, presently the controller maintains a flag indicating whether uploads are allowed, and this value is based on network availability, roaming status, and signal strength. Such a flag would be trivial to maintain in QML provided that all the necessary status information was made available to QML. Similarly, reacting to low battery and low/unavailable disk space situations could be done in QML.
+
+------------------------------------------------
+_signature_
+
+% Local Variables:
+% mode: longlines
+% End:
