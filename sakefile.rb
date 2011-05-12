@@ -15,7 +15,7 @@ desc "Prepares web pages."
 task :web do
   srcfiles = Dir['homepage/*.txt2tags.txt']
   for srcfile in srcfiles
-    htmlfile = File.join("web", File.basename(srcfile.sub(/\.txt2tags\.txt$/, ".html")))
+    htmlfile = File.join("contextlogger2", File.basename(srcfile.sub(/\.txt2tags\.txt$/, ".html")))
     sh("../tools/bin/txt2tags --target xhtml --infile %s --outfile %s --encoding utf-8 -C homepage/config.t2t" % [srcfile, htmlfile])
   end
 end

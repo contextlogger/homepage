@@ -24,7 +24,7 @@ To keep updated about progress, you can look at:
 
 
 ------------------------------------------------
-_signature_
+_signature_th_
 
 % Local Variables:
 % mode: longlines

@@ -38,7 +38,7 @@ ContextLogger2 Known Defects
 
 
 ------------------------------------------------
-_signature_
+_signature_th_
 
 % Local Variables:
 % mode: longlines

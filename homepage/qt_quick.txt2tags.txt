@@ -66,7 +66,7 @@ Currently all of the core logic of the CL2 logger daemon is written in C and C++
 For example, presently the controller maintains a flag indicating whether uploads are allowed, and this value is based on network availability, roaming status, and signal strength. Such a flag would be trivial to maintain in QML provided that all the necessary status information was made available to QML. Similarly, reacting to low battery and low/unavailable disk space situations could be done in QML.
 
 ------------------------------------------------
-_signature_
+_signature_th_
 
 % Local Variables:
 % mode: longlines

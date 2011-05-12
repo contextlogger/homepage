@@ -63,7 +63,7 @@ jid = "myusername@myhost.mydomain/Mobile"
 
 
 ------------------------------------------------
-_signature_
+_signature_th_
 
 % Local Variables:
 % mode: longlines

@@ -32,7 +32,7 @@ h1. Contributing
 Code contributions are welcome. Bugfixes and support for additional "sensors" (e.g., the accelerometer) would be of particular interest. Send patches to _CommitEmailAddress_, or make a GitHub pull request.
 
 ------------------------------------------------
-_signature_
+_signature_th_
 
 % Local Variables:
 % mode: longlines
