@@ -1,5 +1,3 @@
-SAKE := ../tools/bin/sake
-
 default : web
 
 -include local/custom.mk
@@ -20,14 +18,17 @@ upload-php :
 
 html :
 	mkdir -p contextlogger2
-	$(SAKE) web
+	for srcfile in homepage/*.txt2tags.txt; do name=`basename $$srcfile .txt2tags.txt`; destfile=contextlogger2/$${name}.html; ../tools/bin/txt2tags --target xhtml --infile $$srcfile --outfile $$destfile --encoding utf-8 -C homepage/config.t2t; done
 	cp -a ../tools/web/hiit.css contextlogger2/
 	cp -a ../watchdog/graph/states.png contextlogger2/
 	cp -a homepage/*.cpp homepage/*.hpp homepage/*.png homepage/*.jpg homepage/*.diff contextlogger2/
 	../tools/bin/txt2tags --target xhtml --infile ../CONTENTS.txt --outfile contextlogger2/contents.html --encoding utf-8 --verbose --toc -C homepage/config.t2t
 	tidy -utf8 -eq index.html
 
-web : concepts upload-php html
+rm-web :
+	-rm -r contextlogger2
+
+web : rm-web concepts upload-php html
 
 HTDOCS := ../contextlogger.github.com
 PAGEPATH := contextlogger2
