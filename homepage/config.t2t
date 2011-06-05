@@ -6,6 +6,8 @@
 %!postproc(xhtml): '\(break\)' '<br/>'
 %!postproc(xhtml): '\(beginem\)' '<em>'
 %!postproc(xhtml): '\(endem\)' '</em>'
+%!postproc(xhtml): '\(ldquo\)' '&ldquo;'
+%!postproc(xhtml): '\(rdquo\)' '&rdquo;'
 %!preproc(xhtml):  '^h1\.\s+(.*)$' '+\1+'
 %!preproc(xhtml):  '^h2\.\s+(.*)$' '++\1++'
 %!preproc(xhtml):  '^h3\.\s+(.*)$' '+++\1+++'

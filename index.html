@@ -91,11 +91,7 @@ There are <a href="http://twitter.com/contextlogger/status/49814815518097408">Co
 <h2>Introduction</h2>
 
 <p>
-<em>ContextLogger2</em> (CL2) is a tool for smartphone data collection, created primarily with research purposes in mind. It can, for instance, be used in user studies for collecting and recording context information such as GPS and GSM cell ID readings, keypress times, application focus changes, etc. The software presently supports <a href="http://symbian.nokia.com/">Symbian OS</a> based phones. It was developed as a small <a href="http://www.hiit.fi/">HIIT</a> internal project.
-</p>
-
-<p>
-The solution is based on client software installed on a phone that (typically) runs on the background, unintrusively recording information about activities taking place on the phone. The implementation makes heavy use of event-driven programming, an <a href="http://www.sqlite.org/">SQLite</a> database engine, and a <a href="http://www.lua.org/">Lua</a> runtime. More specifically: each &ldquo;sensor&rdquo; runs independently as its own &ldquo;active object&rdquo;, reacting to system events; all persistent data (including any logged data) is managed with SQLite; and configurability of the system revolves around the lightweight dynamic language Lua.
+<em>ContextLogger2</em> (CL2) is a tool for smartphone data collection, created primarily with research purposes in mind. It can, for instance, be used in user studies for collecting and recording context information such as GPS and GSM cell ID readings, keypress times, application focus changes, etc. The software presently supports <a href="http://symbian.nokia.com/">Symbian OS</a> based phones, and work on <a href="http://www.android.com/">Android</a> support has been started. CL2 was initially conceived as a small <a href="http://www.hiit.fi/">HIIT</a> internal project, and its development continues in contexts such as <a href="http://code.google.com/soc/">Google Summer of Code</a> and the Helsinki Privacy Experiment project.
 </p>
 
 <hr class="light" />

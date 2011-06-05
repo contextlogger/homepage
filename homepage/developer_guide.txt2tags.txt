@@ -8,6 +8,10 @@ ContextLogger2 Hacking
 
 h1. Logger
 
+h2. Design Overview
+
+The solution is based on client software installed on a phone that (typically) runs on the background, unintrusively recording information about activities taking place on the phone. The implementation makes heavy use of event-driven programming, an [SQLite http://www.sqlite.org/] database engine, and a [Lua http://www.lua.org/] runtime. More specifically: each (ldquo)sensor(rdquo) runs independently as its own (ldquo)active object(rdquo), reacting to system events; all persistent data (including any logged data) is managed with SQLite; and configurability of the system revolves around the lightweight dynamic language Lua.
+
 h2. General Design Guidelines
 
 The implementation of the logger daemon has been influenced by these guidelines:
@@ -88,7 +92,7 @@ h1. Tools
 
 h2. Koog
 
-[Koog http://korpi.hiit.fi/koog/] is a mixed-code generation tool that we have used in maintaining the logger codebase, mostly interactively under Emacs. In case you're wondering about the ``/***koog***//***end***/`` style comments found in the code. If these comments get on the way, feel free to delete them. It //is// quite possible to maintain the boilerplate code manually as well.
+[Koog ../koog/] is a mixed-code generation tool that we have used in maintaining the logger codebase, mostly interactively under Emacs. In case you're wondering about the ``/***koog***//***end***/`` style comments found in the code. If these comments get on the way, feel free to delete them. It //is// quite possible to maintain the boilerplate code manually as well.
 
 
 ------------------------------------------------

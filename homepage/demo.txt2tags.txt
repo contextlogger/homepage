@@ -7,7 +7,7 @@ ContextLogger2 Demo Download
 
 h2. Quick Download
 
-If you're in a {{{font color="red"}}}hurry{{{/font}}}, just go [{{{b}}}download{{{/b}}} ../../download/]. Choose the build that you think is the best match for your device---the naming is somewhat comprehensible. If you have trouble picking the correct binary, or if the application fails to install or run, then read on.
+If you're in a {{{font color="red"}}}hurry{{{/font}}}, just go [{{{b}}}download{{{/b}}} http://korpi.hiit.fi/contextlogger2/download/]. Choose the build that you think is the best match for your device---the naming is somewhat comprehensible. If you have trouble picking the correct binary, or if the application fails to install or run, then read on.
 
 h1. ContextLogger2 Demo
 
@@ -30,7 +30,7 @@ h2. Demo Downloads
 
 Downloads are available from:
 
-- [download ../../download/]
+- [download http://korpi.hiit.fi/contextlogger2/download/]
 
 
 The ``sisx`` installation packages are signed, while the ``sis`` ones are not. Unsigned packages can generally only be installed on hacked phones, and hence you may have to sign them yourself using Symbian Open Signed or a developer certificate. The ``self30`` variants have maximum self-signed capabilities allowed on S60 v3.0 and v3.1, the ``self32`` variants have maximum self-signed capabilities allowed on S60 v3.2-up, and the ``unsigned`` variants have maximum Symbian Open Signed capabilities. The set of sensors in the builds have been adjusted based on the capabilities. For example, the ``self30`` variants do not include support for location sensors (which require the ``Location`` capability).
