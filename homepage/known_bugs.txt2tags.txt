@@ -1,14 +1,16 @@
-ContextLogger2 Known Defects
+ContextLogger2 Defects and Feature Requests
 
 %%mtime(%c)
 
 %!includeconf: config.t2t
 
-- **Proximity** sensor may produce events too frequently for the current write-to-file-immediately logging to be sensible. Should optimize.
+h1. Bug Reports and Feature Requests
+
+To report a bug or to request a feature, either send email or use the [issue tracking system https://github.com/contextlogger/bugs/issues].
+
+h1. Known Defects Specific to Symbian
 
 - Support for **system backups** of the CL2 libraries has not been fully implemented/tested. See recent PyS60 releases for more on this, or http://wiki.forum.nokia.com/index.php/TSS001073_-_Backup_of_add-on_DLLs. We should add support for url plugin, epocxplat lib, cxx lib, py lib, and miso lib.
-
-- QXmpp sessions sometimes fail on Symbian^3 for some reason, and result in repeated socket errors, indefinitely, seemingly without being able to ever recreate the session. The socket error being repeated is ``QAbstractSocket::HostNotFoundError`` (2). The retry frequency does not decrease as it should, suggesting that the failure counter is not being incremented. There is a possibly related [Qt bug report http://bugreports.qt.nokia.com/browse/QTBUG-8687].
 
 - Some our Qt code may leak resources if an exception occurs in a class constructor.
 
