@@ -30,7 +30,7 @@ The implementation of the logger daemon has been influenced by these guidelines:
 
   - No heavy runtimes are to be used (unless the platform requires it).
 
-  - Use compilers for optimization and increased abstraction --- "execute" code already at compile time, and treat C (and C++) as portable assembly.
+  - Use compilers for optimization and increased abstraction(emdash)"execute" code already at compile time, and treat C (and C++) as portable assembly.
 
   - Consider including compile-time options for disabling added features, to allow for optimization for a given use case by removing unneeded features.
 

@@ -8,7 +8,9 @@ h1. Status Overview
 
 Under development.
 
-Has most of the planned features, but could use a friendlier GUI application, and further improvements to securing the logfiles.
+Has most of the planned features, but could use a friendlier GUI application for configuring the logger, and further improvements to securing the logfiles.
+
+An effort to bring ContextLogger2 to Android has been initiated as part of GSoC 2011.
 
 h1. Following Development Progress
 

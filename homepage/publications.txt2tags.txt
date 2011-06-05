@@ -1,0 +1,22 @@
+ContextLogger2 Publications
+
+%%mtime(%c)
+
+%!includeconf: config.t2t
+
+h1. Publications about ContextLogger2
+
+Antti Oulasvirta and Tero Hasu. ContextLogger2: A Logger Construction Kit. Works in Progress. To appear in [{{{em}}}IEEE Pervasive Computing{{{/em}}} http://www.computer.org/pervasive]. 2011.
+
+Tero Hasu. {{{em}}}ContextLogger2---A tool for smartphone data gathering{{{/em}}}. Helsinki Institute for Information Technology HIIT, Aalto University. August 2010. [abstract http://www.terohasu.net/cl2-tr-abstract.html] [pdf http://www.hiit.fi/files/admin/publications/Technical_Reports/hiit-tr-2010-1.pdf]
+
+h1. Publications about Work Using ContextLogger2
+
+Antti Salovaara, Antti Lindqvist, Tero Hasu, and Jonna Häkkilä. The phone rings but the user doesn't answer: unavailability in mobile communication. To appear in [{{{em}}}MobileHCI 2011{{{/em}}} http://www.mobilehci2011.org/]. 
+
+------------------------------------------------
+_signature_th_
+
+% Local Variables:
+% mode: longlines
+% End:
