@@ -1,0 +1,51 @@
+Introduction to ContextLogger2
+
+%%mtime(%c)
+
+%! Options : --toc --enum-title
+
+h1. Motivation
+
+The smartphone's ubiquity has made it interesting for social sciences. A large fraction of people carries one willingly, and a smartphone integrates a number of technologies for automatic observation and can communicate with remote researchers. Smartphone loggers allow unobtrusive and cost-effective access to previously inaccessible sources of data on everyday behavior, such as auditory environment, proximity of other users, phone calls, and patterns of movement.
+
+Unfortunately, adoption has been slow, one reason  being that the available loggers do not support large-scale research. For a multitude of  reasons, smartphone-based research in its present form is expensive.
+
+h1. Goals
+
+The goal of ContextLogger2 is to support larger-scale research. Characteristic of large-scale research is, naturally,  user populations measured in hundreds and  thousands rather than in tens, and durations  ranging from months and years. Over several studies with ContextLogger1, we learned that the logger decisively affects cost-efficiency. The  logger affects recruitment and training of research personnel, preparation  of a trial, support needed during  it, ability to intervene upon problems, ethical  issues such as security and privacy of research participants, and analysis of  gathered data. With these issues in mind, we set eight additional goals for ContextLogger2:   
+
++ Maximum market coverage 
+
++ Extensibility with new sensors 
+
++ Rapid deployment 
+
++ Real-time monitoring and control 
+
++ Communications efficiency 
+
++ Privacy of personal data 
+
++ Scalability with increasing number of  participants 
+
++ Compatibility with data standards 
+
+
+Needless to say, the goals for ContextLogger2 are very ambitious! Thus far some of the them have been met better than others. 
+
+h1. Current Solution
+
+The current ContextLogger2 codebase contains everything required for deployment on Symbian S60 3rd edition and higher (up to Symbian^3), which in 2010 accounted for 44.3 percent of the smartphone market. Work on Android support has been started to retain reasonably large coverage in the fast-paced mobile market.
+
+An ideal logger would work on every smartphone model, thus minimizing the costs of buying new devices to participants and, on the other hand, increasing realism. This, however, is hardly realistic in the current fragmented market. In creating ContextLogger2 we have instead merely sought not to exclude (beginem)developers(endem) based on the platforms they target, the libraries they have available, or the tools they are using.
+
+What we envision is a “logger construction kit” that strives for portability by providing basic plumbing like build and runtime configuration facilities and a data persistence and transport layer, either implemented fairly portably, or with multiple different implementations to choose from (to cater for different event systems and API availability and such). Developers are then left with more time to focus on platform integration, and on implementing sensors in any language capable of exporting functions in a C or C++ compatible way. Most of the sensors in the current codebase are Symbian C++, but we've recently added some Qt Mobility API based sensors implementations not depending on Symbian.
+
+It is also possible to use dynamic code wherever desired in the logger due to the embedded Lua runtime. We, however, presently only use Lua for portable implementation of configuration files, as well as a basis of a protocol for querying status information and for changing dynamic parameters. An SQLite v3 database engine is used to implement persistence functions portably, without platform specific persistence APIs.
+
+------------------------------------------------
+_signature_ao_, _signature_th_
+
+% Local Variables:
+% mode: longlines
+% End:
