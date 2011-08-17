@@ -6,7 +6,7 @@ ContextLogger2 Features
 
 h1. Features Overview
 
-- Supports Symbian OS v9-up as a target platform, and Linux as a development platform.
+- Supports Symbian OS v9-up as a target platform, and Linux as a development platform. (Android support is under way.)
 
 - Non-intrusive, persistent, and robust data logging.
 
@@ -170,8 +170,10 @@ h1. Features Overview
   - "Name" and "Address" (URL) for new entries
 
 
+The above sensor list primarily concerns Symbian, and not all of the sensors are supported on all Symbian phone models (as support depends on hardware and API availability). Android sensor support information has not yet been included in the above list, see the [relevant wiki page https://github.com/contextlogger/android/wiki/Information-to-log] instead.
+
 ------------------------------------------------
-_signature_
+_signature_th_
 
 % Local Variables:
 % mode: longlines

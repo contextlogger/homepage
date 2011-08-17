@@ -7,7 +7,7 @@ ContextLogger2 Source Code
 
 h1. Source Code
 
-- ContextLogger2 source code is retrievable with [Git http://git-scm.com/]: 
+- ContextLogger2 source code is [hosted on GitHub https://github.com/contextlogger]. The code is retrievable with [Git http://git-scm.com/] as follows: 
 
 ```
 git clone git://github.com/contextlogger/contextlogger2.git

@@ -10,11 +10,13 @@ To report a bug or to request a feature, either send email or use the [issue tra
 
 h1. Known Defects Specific to Symbian
 
+- Should only attempt to **create tables** if the ``status_log`` table does not already exist. (The particular table should always exist if any tables have been created.)
+
+- The **Qt-based** uploader does not have **IAP selection** code for Symbian, which it really should have to honor roaming settings etc. Although things work quite well without on Symbian^3, which tends to be more automatic when it comes to creating connections. ``QNetworkConfigurationManager`` does not appear to currently list any configurations on Symbian^3, which may be a bug in Qt. (It would appear to list something with newer versions of Qt, so this defect may now be easier to fix.)
+
 - Support for **system backups** of the CL2 libraries has not been fully implemented/tested. See recent PyS60 releases for more on this, or http://wiki.forum.nokia.com/index.php/TSS001073_-_Backup_of_add-on_DLLs. We should add support for url plugin, epocxplat lib, cxx lib, py lib, and miso lib.
 
 - Some our Qt code may leak resources if an exception occurs in a class constructor.
-
-- The **Qt-based** uploader does not have **IAP selection** code for Symbian, which it really should have to honor roaming settings etc. Although things work quite well without on Symbian^3, which tends to be more automatic when it comes to creating connections. ``QNetworkConfigurationManager`` does not appear to currently list any configurations on Symbian^3, which may be a bug in Qt. (It does list something on S60 v5.0.)
 
 - There is flight mode observing in the call status sensor. To avoid duplication of logic, should get this information via the blackboard. (More maintainable, and likely more efficient as well.)
 

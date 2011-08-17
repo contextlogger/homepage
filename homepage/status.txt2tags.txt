@@ -10,7 +10,7 @@ Under development.
 
 Most of the planned features are supported on Symbian, but could use a friendlier GUI application for configuring the logger, and further improvements to securing the logfiles.
 
-An [initiative porting_soc.html] to port ContextLogger2 to another smartphone platform has resulted in an effort to [bring ContextLogger2 to Android https://github.com/contextlogger/wiki/wiki/ContextLogger-for-Android]. The porting work has been started as part of GSoC 2011.
+An [initiative porting_soc.html] to port ContextLogger2 to another smartphone platform has resulted in an effort to [bring ContextLogger2 to Android https://github.com/contextlogger/android/wiki]. The porting work has been started as part of GSoC 2011.
 
 h1. Following Development Progress
 
