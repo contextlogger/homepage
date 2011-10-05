@@ -4,11 +4,15 @@ ContextLogger2 Roadmap
 
 %!includeconf: config.t2t
 
+- Should consider using the "Internet" **logical access point** in newer Symbian devices as a sensible default (when available). The Qt API at least now reports it on Symbian Anna.
+
 - It would be good to have a **descriptive error dialog** should there be an error parsing/evaluating the contents of any **configuration file**.
 
 - Create/find Lua bindings for sqlite3 database access. Adapt for log database (LogDb) access; this will allow for **database queries via the Symbian client/server interface**, and later remotely. See ``libluasqlite3.c`` in the codebase. We can remove database opening/closing functions, and just export a handle to the one database that we do have.
 
-- An end-user **logger control panel** application. Something simple and pretty, just for starting and stopping logger and watchdog. Based on Qt, probably.
+- An end-user **logger control panel** application. Something simple and pretty, just for starting and stopping logger and watchdog. Based on Qt, probably. On recent devices this could possible be a widget to put on the home screen.
+
+- For **installation convenience**, should find out if required SSL certs are installed, and if not, automatically install them or (if that is not possible) launch an interactive installer to do it. Could similarly install Watchdog, even though its SIS cannot be embedded; the SIS could probably be unpacked from the mega-SIS, then programmatically installed, and then programmatically launched. There is a ``mctwritablecertstore.h`` header at least in some SDKs, which has functionality for adding certs. The ``mcertstore.h`` supports listing of certificates. There also is an API for doing programmatic software installation (see pyswinst, say). This functionality could be coupled with the user-friendly control panel application, to help keep things running, and to show what is running.
 
 - **WLAN scanning** would be a useful addition for collecting location data. Look at the wlantools Python extension, or at [WLANMgmt https://www.iyouit.eu/portal/Software.aspx]. Alternatively: it seems that Symbian^3 devices support 'Wi-Fi/Network' positioning, and we might be able to just use an ``RPositioner`` to get position information based on WLAN information, say in the ``cellpos`` sensor, after cell ID changes.
 
@@ -18,7 +22,7 @@ ContextLogger2 Roadmap
 
 - A **status indicator** that shows whether the logger is running, on the standby screen. ContextPhone has this, and we can perhaps use the same code; see ``ContextNotify`` (server drawing on top of Phone screen) and ``ContextNotifyClient`` (driving the thing); this solution is a klugde, though, but the only thing that one can do pre-N97 without being a manufacturer.
 
-- A proper **status indicator** for devices with N97 style standby screen. On the N97 (only) there is the [Home Screen Publishing API http://library.forum.nokia.com/topic/S60_5th_Edition_Cpp_Developers_Library/GUID-759FBC7F-5384-4487-8457-A8D4B76F6AA6/html/Home_Screen_Publishing_APIIndexPage.html] that we can use instead of more kludgey solutions.
+- A proper **status indicator** for devices with N97 style standby screen. On the N97 (only) there is the [Home Screen Publishing API http://library.forum.nokia.com/topic/S60_5th_Edition_Cpp_Developers_Library/GUID-759FBC7F-5384-4487-8457-A8D4B76F6AA6/html/Home_Screen_Publishing_APIIndexPage.html] that we can use instead of more kludgey solutions. Symbian Anna certainly should have decent support for this.
 
 - Could use some **Lua bindings for Remokon** access. Start, stop, is running, is connected, is enabled, send given message to given JID, etc. Add Remokon submenu to Launcher.
 
@@ -40,6 +44,8 @@ ContextLogger2 Roadmap
 - The **N97** supports a new [OOM Monitor Client API http://library.forum.nokia.com/topic/S60_5th_Edition_Cpp_Developers_Library/GUID-759FBC7F-5384-4487-8457-A8D4B76F6AA6/html/OOM_Monitor_APIIndexPage.html]. We might want to be using this for better **system-wide low-memory condition handling**.
 
 - **Sandbox mobile code.** Add privilege support to Lua VM. Flag to VM and checks to dangerous bindings. Mobile code may not execute privileged functions. Or it may be enough to simply choose carefully what libraries to make available to a given Lua instance. But any of this will not be useful until significant functionality is implemented internally for Lua, and said functionality requires dangerous operations.
+
+- A **software updater** application. Would install any required software and certificates, downloading it off the web if not embedded, and fetch configuration information based on IMEI code. This kind of an application is just about the only way to enable a single-SIS distribution due to PlatSec.
 
 - After-checkout **source tree preparation**. Building the logger, freshly checked out with Git, is not straightforward when relying on standard tools such as ABLD and Carbide. Have a single platform-agnostic script at the root of the repo that produces the generated source files for all components, and also creates standard ``group`` directories with project files for some sensible default configuration. This should make it easier to get started. For added convenience, might even generate Carbide projects files if there is a tool that supports their creation.
 
